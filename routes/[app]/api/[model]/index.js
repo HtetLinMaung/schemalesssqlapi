@@ -36,6 +36,15 @@ const handleGet = async (req, res) => {
     if (req.query.$order) {
       findOptions["order"] = JSON.parse(req.query.$order);
     }
+    if (req.query.$populate) {
+      findOptions["$include"] = req.query.$populate;
+    }
+    if (req.query.$include) {
+      findOptions["include"] =
+        req.query.$include.includes("[") && req.query.$include.includes("]")
+          ? JSON.parse(req.query.$include)
+          : req.query.$include;
+    }
 
     if (req.query.$page && req.query.$perpage) {
       perpage = parseInt(req.query.$perpage);
@@ -92,6 +101,7 @@ const handlePost = async (req, res) => {
     req.searchColumns = searchColumns;
     req.Model = sequelize.define(model, schemaBody, { tableName: model });
     await req.Model.sync();
+    // await req.Model.sync({ alter: true });
   }
   const data = await req.Model.create(req.body || {});
   const resBody = {

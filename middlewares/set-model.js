@@ -1,7 +1,10 @@
+const { Op } = require("sequelize");
+const Association = require("../models/Association");
 const ModelDefinition = require("../models/ModelDefinition");
 const connectSequelize = require("../utils/connect-sequelize");
 const sequelize = require("../utils/database");
 const dbSchemaToSchema = require("../utils/dbSchema-to-schema");
+const mdToModelById = require("../utils/md-to-model-by-id");
 
 module.exports = async (req) => {
   console.log({
@@ -37,7 +40,29 @@ module.exports = async (req) => {
         }
       );
       req.searchColumns = modelDefinition.searchColumns;
+
+      const associations = await Association.findAll({
+        where: {
+          [Op.or]: [
+            {
+              modelA: modelDefinition.id,
+            },
+            {
+              modelB: modelDefinition.id,
+            },
+          ],
+        },
+      });
       await req.Model.sync();
+      for (const association of associations) {
+        const ModelA = await mdToModelById(association.modelA);
+        const ModelB = await mdToModelById(association.modelB);
+        await ModelA.sync();
+        await ModelB.sync();
+        await ModelA.sync({ alter: true });
+        await ModelB.sync({ alter: true });
+        ModelA[association.type](ModelB, association.options);
+      }
     }
   }
 };

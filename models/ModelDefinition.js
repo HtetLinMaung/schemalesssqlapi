@@ -1,8 +1,10 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../utils/database");
 
+const Association = require("./Association");
+
 const ModelDefinition = sequelize.define(
-  "ModelDefinition",
+  "modeldefinition",
   {
     id: {
       type: DataTypes.STRING,
@@ -48,5 +50,10 @@ const ModelDefinition = sequelize.define(
     tableName: "modeldefinitions",
   }
 );
+
+ModelDefinition.hasMany(Association, { foreignKey: "modelA" });
+ModelDefinition.hasMany(Association, { foreignKey: "modelB" });
+Association.belongsTo(ModelDefinition, { foreignKey: "modelA" });
+Association.belongsTo(ModelDefinition, { foreignKey: "modelB" });
 
 module.exports = ModelDefinition;

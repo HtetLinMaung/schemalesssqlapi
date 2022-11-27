@@ -26,6 +26,15 @@ const getById = async (req) => {
         ...findOptions.where,
       };
     }
+    if (req.query.$populate) {
+      findOptions["$include"] = req.query.$populate;
+    }
+    if (req.query.$include) {
+      findOptions["include"] =
+        req.query.$include.includes("[") && req.query.$include.includes("]")
+          ? JSON.parse(req.query.$include)
+          : req.query.$include;
+    }
 
     data = await req.Model.findOne(findOptions);
   }
