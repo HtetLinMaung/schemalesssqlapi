@@ -14,6 +14,7 @@ const handleGet = async (req, res) => {
 
   if (req.Model) {
     const findOptions = {};
+    const where = await generateWhere(req);
     if (req.query.$projections) {
       req.query["$attributes"] = req.query.$projections;
     }
@@ -26,8 +27,8 @@ const handleGet = async (req, res) => {
     if (req.query.$filter) {
       req.query["$where"] = req.query.$filter;
     }
-    if (req.query.$where || req.query.$search) {
-      findOptions["where"] = await generateWhere(req);
+    if (req.query.$where || req.query.$search || Object.keys(where).length) {
+      findOptions["where"] = where;
     }
     if (req.query.$sort) {
       req.query["$order"] = req.query.$sort;
@@ -112,8 +113,12 @@ const handleUpdate = async (req, res) => {
     return res.status(404).json(resBody);
   }
   const findOptions = {};
-  if (req.query.$where || req.query.$search) {
-    findOptions["where"] = await generateWhere(req);
+  const where = await generateWhere(req);
+  if (req.query.$filter) {
+    req.query["$where"] = req.query.$filter;
+  }
+  if (req.query.$where || req.query.$search || Object.keys(where).length) {
+    findOptions["where"] = where;
   }
   await req.Model.update(req.body, findOptions);
   const resBody = {
@@ -134,8 +139,12 @@ const handleDelete = async (req, res) => {
     return res.status(404).json(resBody);
   }
   const findOptions = {};
-  if (req.query.$where || req.query.$search) {
-    findOptions["where"] = await generateWhere(req);
+  const where = await generateWhere(req);
+  if (req.query.$filter) {
+    req.query["$where"] = req.query.$filter;
+  }
+  if (req.query.$where || req.query.$search || Object.keys(where).length) {
+    findOptions["where"] = where;
   }
   await req.Model.destroy(findOptions);
   const resBody = {
