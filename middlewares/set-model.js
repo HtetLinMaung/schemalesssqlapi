@@ -63,6 +63,7 @@ module.exports = async (req) => {
         await ModelB.sync({ alter: true });
         ModelA[association.type](ModelB, association.options);
       }
+      await req.Model.sync({ alter: true });
     }
   }
 };
