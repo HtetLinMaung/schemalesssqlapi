@@ -15,7 +15,7 @@ const ModelDefinition = sequelize.define(
     },
     schema: {
       type: DataTypes.TEXT,
-      defaultValue: {},
+      defaultValue: JSON.stringify({}),
       get() {
         return JSON.parse(this.getDataValue("schema"));
       },
@@ -25,7 +25,7 @@ const ModelDefinition = sequelize.define(
     },
     options: {
       type: DataTypes.TEXT,
-      defaultValue: {},
+      defaultValue: JSON.stringify({}),
       get() {
         return JSON.parse(this.getDataValue("options"));
       },
@@ -35,7 +35,7 @@ const ModelDefinition = sequelize.define(
     },
     searchColumns: {
       type: DataTypes.TEXT,
-      defaultValue: [],
+      defaultValue: JSON.stringify([]),
       get() {
         return JSON.parse(this.getDataValue("searchColumns"));
       },

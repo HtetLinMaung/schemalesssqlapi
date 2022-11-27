@@ -14,14 +14,23 @@ const handleGet = async (req, res) => {
 
   if (req.Model) {
     const findOptions = {};
+    if (req.query.$projections) {
+      req.query["$attributes"] = req.query.$projections;
+    }
     if (req.query.$select) {
       req.query["$attributes"] = req.query.$select;
     }
     if (req.query.$attributes) {
       findOptions["attributes"] = JSON.parse(req.query.$attributes);
     }
-    if (req.query.$where) {
-      findOptions["where"] = generateWhere(req);
+    if (req.query.$filter) {
+      req.query["$where"] = req.query.$filter;
+    }
+    if (req.query.$where || req.query.$search) {
+      findOptions["where"] = await generateWhere(req);
+    }
+    if (req.query.$sort) {
+      req.query["$order"] = req.query.$sort;
     }
     if (req.query.$order) {
       findOptions["order"] = JSON.parse(req.query.$order);
@@ -79,7 +88,7 @@ const handlePost = async (req, res) => {
         tableName: model,
       },
     });
-
+    req.searchColumns = searchColumns;
     req.Model = sequelize.define(model, schemaBody, { tableName: model });
     await req.Model.sync();
   }
@@ -103,8 +112,8 @@ const handleUpdate = async (req, res) => {
     return res.status(404).json(resBody);
   }
   const findOptions = {};
-  if (req.query.$where) {
-    findOptions["where"] = generateWhere(req);
+  if (req.query.$where || req.query.$search) {
+    findOptions["where"] = await generateWhere(req);
   }
   await req.Model.update(req.body, findOptions);
   const resBody = {
@@ -125,8 +134,8 @@ const handleDelete = async (req, res) => {
     return res.status(404).json(resBody);
   }
   const findOptions = {};
-  if (req.query.$where) {
-    findOptions["where"] = generateWhere(req);
+  if (req.query.$where || req.query.$search) {
+    findOptions["where"] = await generateWhere(req);
   }
   await req.Model.destroy(findOptions);
   const resBody = {

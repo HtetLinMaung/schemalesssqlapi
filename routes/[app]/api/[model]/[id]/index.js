@@ -10,15 +10,18 @@ const getById = async (req) => {
         id: req.params.id,
       },
     };
+    if (req.query.$projections) {
+      req.query["$attributes"] = req.query.$projections;
+    }
     if (req.query.$select) {
       req.query["$attributes"] = req.query.$select;
     }
     if (req.query.$attributes) {
       findOptions["attributes"] = JSON.parse(req.query.$attributes);
     }
-    if (req.query.$where) {
+    if (req.query.$where || req.query.$search) {
       findOptions["where"] = {
-        ...generateWhere(req),
+        ...(await generateWhere(req)),
         ...findOptions.where,
       };
     }

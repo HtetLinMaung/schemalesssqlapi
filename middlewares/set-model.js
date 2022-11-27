@@ -15,7 +15,11 @@ module.exports = async (req) => {
   });
   const { model } = req.params;
   await connectSequelize();
-  req.Model = sequelize.model(model);
+  try {
+    req.Model = sequelize.model(model);
+  } catch (err) {
+    req.Model = null;
+  }
 
   if (!req.Model) {
     const modelDefinition = await ModelDefinition.findOne({
